@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Study Planner</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#4f46e5,#9333ea);
+    min-height:100vh;
+    padding:20px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    color:white;
+    font-size:3rem;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:white;
+    margin-bottom:20px;
+}
+
+.quote{
+    background:white;
+    color:#7c3aed;
+    text-align:center;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:20px;
+    font-weight:bold;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 10px 20px rgba(0,0,0,0.2);
+}
+
+.card h2{
+    color:#4f46e5;
+    margin-bottom:15px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    background:#4f46e5;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:5px;
+}
+
+button:hover{
+    background:#312e81;
+}
+
+.subject{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#eef2ff;
+    padding:10px;
+    margin-top:10px;
+    border-radius:8px;
+}
+
+.progress-container{
+    width:100%;
+    height:25px;
+    background:#ddd;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:10px;
+}
+
+.progress-bar{
+    width:0%;
+    height:100%;
+    background:linear-gradient(90deg,#22c55e,#16a34a);
+    transition:0.5s;
+}
+
+#progressText{
+    margin-top:10px;
+    font-weight:bold;
+}
+
+.countdown{
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    color:#ea580c;
+    margin-top:15px;
+}
+
+.timer{
+    text-align:center;
+    font-size:30px;
+    font-weight:bold;
+    color:#dc2626;
+    margin:15px 0;
+}
+
+.stats{
+    display:flex;
+    justify-content:space-between;
+    margin-top:10px;
+}
+
+.stat-box{
+    width:48%;
+    background:#eef2ff;
+    text-align:center;
+    padding:15px;
+    border-radius:10px;
+}
+
+@media(max-width:768px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    h1{
+        font-size:2rem;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>📚 Smart Study Planner</h1>
+
+<div class="subtitle">
+Plan Smart • Study Better • Score Higher
+</div>
+
+<div class="quote" id="quote">
+Success is the sum of small efforts repeated day after day.
+</div>
+
+<div class="grid">
+
+<!-- SUBJECTS -->
+
+<div class="card">
+<h2>Add Subjects</h2>
+
+<input type="text" id="subjectInput" placeholder="Enter Subject Name">
+
+<button onclick="addSubject()">
+Add Subject
+</button>
+
+<div id="subjectList"></div>
+</div>
+
+<!-- GOAL TRACKER -->
+
+<div class="card">
+<h2>Daily Study Goal</h2>
+
+<input type="number" id="goalHours" placeholder="Goal Hours">
+
+<button onclick="saveGoal()">
+Save Goal
+</button>
+
+<input type="number" id="completedHours" placeholder="Completed Hours">
+
+<button onclick="updateProgress()">
+Update Progress
+</button>
+
+<div class="progress-container">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+
+<p id="progressText">0% Completed</p>
+</div>
+
+<!-- EXAM COUNTDOWN -->
+
+<div class="card">
+<h2>Exam Countdown</h2>
+
+<input type="date" id="examDate">
+
+<button onclick="startCountdown()">
+Start Countdown
+</button>
+
+<div class="countdown" id="countdown">
+Select Exam Date
+</div>
+</div>
+
+<!-- POMODORO -->
+
+<div class="card">
+<h2>Pomodoro Timer</h2>
+
+<div class="timer" id="timer">
+25:00
+</div>
+
+<button onclick="startPomodoro()">Start</button>
+<button onclick="pausePomodoro()">Pause</button>
+<button onclick="resetPomodoro()">Reset</button>
+</div>
+
+<!-- STUDY STATS -->
+
+<div class="card">
+<h2>Study Statistics</h2>
+
+<div class="stats">
+
+<div class="stat-box">
+<h3 id="subjectCount">0</h3>
+<p>Subjects</p>
+</div>
+
+<div class="stat-box">
+<h3 id="goalDisplay">0</h3>
+<p>Goal Hours</p>
+</div>
+
+</div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* MOTIVATIONAL QUOTES */
+
+const quotes = [
+"Success is the sum of small efforts repeated day after day.",
+"Discipline beats motivation.",
+"Dream big. Study smart.",
+"Consistency creates excellence.",
+"Every hour studied is an investment in your future.",
+"Focus on progress, not perfection."
+];
+
+document.getElementById("quote").innerText =
+quotes[Math.floor(Math.random()*quotes.length)];
+
+
+/* SUBJECT MANAGEMENT */
+
+let subjects =
+JSON.parse(localStorage.getItem("subjects")) || [];
+
+function saveSubjects(){
+localStorage.setItem(
+"subjects",
+JSON.stringify(subjects)
+);
+}
+
+function displaySubjects(){
+
+let list =
+document.getElementById("subjectList");
+
+list.innerHTML = "";
+
+subjects.forEach((subject,index)=>{
+
+let div =
+document.createElement("div");
+
+div.className = "subject";
+
+div.innerHTML = `
+<span>${subject}</span>
+<button onclick="deleteSubject(${index})">
+Delete
+</button>
+`;
+
+list.appendChild(div);
+
+});
+
+document.getElementById("subjectCount")
+.innerText = subjects.length;
+}
+
+function addSubject(){
+
+let input =
+document.getElementById("subjectInput");
+
+if(input.value.trim() === ""){
+alert("Enter Subject Name");
+return;
+}
+
+subjects.push(input.value);
+
+saveSubjects();
+
+displaySubjects();
+
+input.value = "";
+}
+
+function deleteSubject(index){
+
+subjects.splice(index,1);
+
+saveSubjects();
+
+displaySubjects();
+}
+
+displaySubjects();
+
+
+/* DAILY GOAL */
+
+let goal =
+localStorage.getItem("goal") || 0;
+
+document.getElementById("goalDisplay")
+.innerText = goal;
+
+function saveGoal(){
+
+goal =
+document.getElementById("goalHours").value;
+
+localStorage.setItem(
+"goal",
+goal
+);
+
+document.getElementById("goalDisplay")
+.innerText = goal;
+
+alert("Goal Saved Successfully");
+}
+
+function updateProgress(){
+
+let completed =
+document.getElementById("completedHours").value;
+
+if(goal == 0){
+alert("Please Set Goal First");
+return;
+}
+
+let percentage =
+(completed / goal) * 100;
+
+if(percentage > 100){
+percentage = 100;
+}
+
+document.getElementById("progressBar")
+.style.width = percentage + "%";
+
+document.getElementById("progressText")
+.innerText =
+Math.round(percentage) + "% Completed";
+
+localStorage.setItem(
+"progress",
+percentage
+);
+}
+
+let savedProgress =
+localStorage.getItem("progress");
+
+if(savedProgress){
+
+document.getElementById("progressBar")
+.style.width =
+savedProgress + "%";
+
+document.getElementById("progressText")
+.innerText =
+Math.round(savedProgress) +
+"% Completed";
+}
+
+
+/* EXAM COUNTDOWN */
+
+let countdownInterval;
+
+function startCountdown(){
+
+clearInterval(countdownInterval);
+
+let examDate =
+new Date(
+document.getElementById("examDate").value
+);
+
+countdownInterval =
+setInterval(()=>{
+
+let now =
+new Date();
+
+let difference =
+examDate - now;
+
+if(difference <= 0){
+
+document.getElementById("countdown")
+.innerHTML =
+"🎉 Best Of Luck For Your Exam!";
+
+clearInterval(countdownInterval);
+
+return;
+}
+
+let days =
+Math.floor(
+difference/(1000*60*60*24)
+);
+
+let hours =
+Math.floor(
+(difference%(1000*60*60*24))
+/
+(1000*60*60)
+);
+
+let minutes =
+Math.floor(
+(difference%(1000*60*60))
+/
+(1000*60)
+);
+
+let seconds =
+Math.floor(
+(difference%(1000*60))
+/
+1000
+);
+
+document.getElementById("countdown")
+.innerHTML =
+`${days} Days ${hours} Hours ${minutes} Minutes ${seconds} Seconds`;
+
+},1000);
+}
+
+
+/* POMODORO TIMER */
+
+let time = 1500;
+let timerInterval;
+
+function updateTimer(){
+
+let minutes =
+Math.floor(time/60);
+
+let seconds =
+time % 60;
+
+document.getElementById("timer")
+.innerText =
+`${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+}
+
+function startPomodoro(){
+
+clearInterval(timerInterval);
+
+timerInterval =
+setInterval(()=>{
+
+if(time > 0){
+
+time--;
+
+updateTimer();
+
+}else{
+
+clearInterval(timerInterval);
+
+alert("Pomodoro Session Completed!");
+
+}
+
+},1000);
+}
+
+function pausePomodoro(){
+clearInterval(timerInterval);
+}
+
+function resetPomodoro(){
+
+clearInterval(timerInterval);
+
+time = 1500;
+
+updateTimer();
+}
+
+updateTimer();
+
+</script>
+
+</body>
+</html>
